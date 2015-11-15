@@ -1,0 +1,12 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+#GET        /                          controllers.Application.index
+
+GET        /back-pressured-stream     controllers.Application.backPressuredStream(periodMillis: Int, seed: Long)
+GET        /simple-stream             controllers.Application.simpleStream(periodMillis: Int, seed: Long)
+
+# Map static resources from the /public folder to the /assets URL path
+GET        /assets/*file              controllers.Assets.at(path="/public", file)
