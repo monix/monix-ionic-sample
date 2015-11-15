@@ -12,7 +12,9 @@ final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: B
   extends Observable[Event] {
 
   def onSubscribe(subscriber: Subscriber[Event]): Unit = {
-    val host = "localhost:9000"//dom.window.location.host
+    val hostEmulator = "10.0.2.2:9000"
+    val hostBrowser = "localhost:9000"
+    val host = hostBrowser
     println("SUBSCRIBE")
     val source = if (doBackPressure) {
       val url = s"ws://$host/back-pressured-stream?periodMillis=${interval.toMillis}&seed=$seed"
