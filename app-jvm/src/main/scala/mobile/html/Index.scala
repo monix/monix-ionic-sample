@@ -16,14 +16,15 @@ object Index extends HtmlCompilable {
   override def output: String = {
     val jsFileBaseName = s"js/$moduleName"
     val optModeSuffix = optMode match {
-      case "fastOpt" => "fastopt.js"
-      case "fullOpt" => "opt.js"
+      case _ => "fastopt.js"
+//      case "fastOpt" => "fastopt.js"
+//      case "fullOpt" => "opt.js"
     }
     html(
       head(
         meta(charset := "utf-8"),
         meta(name := "viewport", content := "initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"),
-        htitle("Scala.js Ionic Start Tabs Application"),
+        htitle("Monifu Scala.js Ionic Start Tabs Application"),
         meta(httpEquiv := "Content-Security-Policy", content := "default-src * 'unsafe-inline' 'unsafe-eval';"),
         link(href := "lib/ionic/css/ionic.min.css", rel := "stylesheet"),
         link(href := "css/style.css", rel := "stylesheet"),

@@ -34,7 +34,7 @@ object IonicBuild extends Build {
   // customizable val here
   lazy val outputCompiledJS = new File("ionic/www/js")
   lazy val outputCompiledHTML = new File("ionic/www")
-  lazy val htmlScalaSourceDir = "com/olivergg/html"
+  lazy val htmlScalaSourceDir = "mobile/html"
 
   /////////////////////////////////////////
   /// private vals below

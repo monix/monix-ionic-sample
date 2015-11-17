@@ -3,10 +3,9 @@ package mobile.stream
 import monifu.reactive.OverflowStrategy.DropNew
 import monifu.reactive.{Observable, Subscriber}
 // import org.scalajs.dom
-import shared.models.{Event, OverflowEvent, Signal}
+import shared.models._
 import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.js.Dynamic.global
-import shared.models.Friend
 
 final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: Boolean)
   extends Observable[Event] {
@@ -15,7 +14,7 @@ final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: B
     val hostEmulator = "10.0.2.2:9000"
     val hostBrowser = "localhost:9000"
     val host = hostBrowser
-    println("SUBSCRIBE")
+
     val source = if (doBackPressure) {
       val url = s"ws://$host/back-pressured-stream?periodMillis=${interval.toMillis}&seed=$seed"
       BackPressuredWebSocketClient(url)
@@ -34,13 +33,13 @@ final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: B
     def unapply(message: String) = {
       val json = global.JSON.parse(message)
       json.event.asInstanceOf[String] match {
-        case "friend" => {
+        case "chat" => {
           Some(Signal(
-            value = Friend(
+            value = Chat(
               json.value.id.asInstanceOf[Number].intValue(),
               json.value.name.asInstanceOf[String],
-              "",
-              ""
+              json.value.lastText.asInstanceOf[String],
+              json.value.face.asInstanceOf[String]
             ),
             timestamp = json.timestamp.asInstanceOf[Number].longValue()
           ))}

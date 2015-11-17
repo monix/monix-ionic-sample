@@ -1,4 +1,4 @@
-package mobile.starttabs.dto
+package shared.models
 
 import scala.scalajs.js.annotation.JSExportAll
 @JSExportAll

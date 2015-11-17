@@ -19,14 +19,6 @@ object FriendsService {
     friends
   }
 
-  def replace(i:Int, f: Friend):Array[Friend] = {
-    this.friends(i) = f
-    this.friends
-  }
-  // def push(f: Friend): Array[Friend] = {
-  //   this.friends.push(f)
-  //   this.friends
-  // }
 
   def get(id: Int): Friend = {
     println(s"calling get in FriendService for id = $id")

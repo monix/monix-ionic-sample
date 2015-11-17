@@ -16,8 +16,8 @@ case class OverflowEvent(dropped: Long, timestamp: Long)
   val event = "overflow"
 }
 
-case class Signal(value: Friend, timestamp: Long)
+case class Signal(value: Chat, timestamp: Long)
   extends Event {
 
-  val event = "friend"
+  val event = "chat"
 }
