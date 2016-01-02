@@ -6,11 +6,10 @@
 // appJS and appJVM share the appSharedSettings
 // appJS uses scalaJSSettings which is specific for javascript development.
 lazy val root = project.in(file(".")).aggregate(sharedJs, sharedJvm, appJS, appJVM, server).settings(
-  name := "Monifu Scala-js Ionic Starter Application Tabs (Root)",
+  name := "Monix Scala-js Ionic Starter Application Tabs (Root)",
   publish := {},
   publishLocal := {}
 )
-
 
 
 /// Defined a task that returns the function to compile some scala files to HTML files (using ScalaTags).
@@ -46,18 +45,18 @@ lazy val server = (project in file("server")).settings(
     scalaVersion := scalaV,
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     libraryDependencies ++= Seq(
-      "org.monifu" %% "monifu" % "1.0-RC2",
+      "org.monifu" %% "monifu" % "1.0",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
-    )
+    ),
   // Heroku specific
-  //herokuAppName in Compile := "monifu-sample",
-  //herokuSkipSubProjects in Compile := false
+  herokuAppName in Compile := "monifu-ionic-sample",
+  herokuSkipSubProjects in Compile := false
   )
   .enablePlugins(PlayScala)
   .dependsOn(sharedJvm)
 
 lazy val appSharedSettings = Seq(
-  version := "0.1-SNAPSHOT",
+  version := "0.2-SNAPSHOT",
   scalaVersion := scalaV,
   unmanagedSourceDirectories in Compile += baseDirectory.value / ".." / "app-shared" / "src" / "main" / "scala",
   // Download and link sources for library dependencies (when using sbt eclipse)
@@ -74,13 +73,13 @@ lazy val appJS = project.in(file("app-js"))
   .settings(appSharedSettings: _*)
   .settings(
     // Add JS-specific settings here
-    name := "Monifu Scala-js Ionic Starter Application Tabs",
+    name := "Monix Scala-js Ionic Starter Application Tabs",
     normalizedName := "ionic-starttabs",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.8.0",
       "com.greencatsoft" %%% "scalajs-angular" % "0.6",
       "com.github.benhutchison" %%% "prickle" % "1.1.9",
-      "org.monifu" %%% "monifu" % "1.0-RC2"
+      "org.monifu" %%% "monifu" % "1.0"
     ),
     jsDependencies += RuntimeDOM,
     /// Webjars dependencies
@@ -116,8 +115,8 @@ lazy val appJVM = project.in(file("app-jvm"))
   .settings(appSharedSettings: _*)
   .settings(
     // Add JVM-specific settings here
-    name := "Monifu Scala-js Ionic Starter Application Tabs (JVM)",
-    normalizedName := "ionic-starttabs",
+    name := "Monix Scala-js Ionic Starter Application Tabs (JVM)",
+    normalizedName := "monix-ionic",
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "scalatags" % "0.5.2"
     ),

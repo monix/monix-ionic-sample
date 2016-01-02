@@ -13,6 +13,7 @@ final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: B
   def onSubscribe(subscriber: Subscriber[Event]): Unit = {
     val hostEmulator = "10.0.2.2:9000"
     val hostBrowser = "localhost:9000"
+    val hostHeroku = "monifu-ionic-sample.herokuapp.com"
     val host = hostBrowser
 
     val source = if (doBackPressure) {
