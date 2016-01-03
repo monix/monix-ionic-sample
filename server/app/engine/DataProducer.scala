@@ -3,7 +3,7 @@ package engine
 import monifu.reactive.{Subscriber, Observable}
 import monifu.concurrent.FutureUtils.delayedResult
 import monifu.util.Random
-import shared.models.{Chat, Signal, Friend}
+import shared.models.{Chat, Signal}
 import scala.concurrent.duration._
 
 final class DataProducer(interval: FiniteDuration, seed: Long)
