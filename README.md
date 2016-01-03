@@ -93,7 +93,7 @@ You would also need to modify **app-js/src/main/scala/mobile/DataConsumer.scala*
 of localhost as the emulator sees it.
  
  
-### Running on a device ### 
+### Running on a device
 
 In **app-js/src/main/scala/mobile/DataConsumer.scala** change line 17 to
 ```
