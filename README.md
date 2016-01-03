@@ -92,7 +92,13 @@ See Ionic docs here [http://ionicframework.com/docs/guide/installation.html](htt
 You would also need to modify **app-js/src/main/scala/mobile/DataConsumer.scala** to have **hostEmulator** represent the IP
 of localhost as the emulator sees it.
  
+ 
 ### Running on a device ### 
+
+In **app-js/src/main/scala/mobile/DataConsumer.scala** change line 17 to
+```
+    val host = hostHeroku
+```
 
 Helpful information can be found here [http://ionicframework.com/docs/guide/testing.html](http://ionicframework.com/docs/guide/testing.html)
 
