@@ -2,10 +2,10 @@
 <widget id="com.ionicframework.ionic516178" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>starttabs</name>
     <description>
-        Ionic Start Tabs starter application based on Scala.js
+        Monix Ionic sample
     </description>
-    <author email="hi@ionicframework" href="https://github.com/olivergg">
-      Olivergg
+    <author email="hi@ionicframework" href="https://github.com/aoprisan">
+      Andrei Oprisan
     </author>
     <content src="index.html" />
     <access origin="*" />
