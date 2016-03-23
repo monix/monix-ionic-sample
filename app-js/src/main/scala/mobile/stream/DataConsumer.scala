@@ -14,7 +14,7 @@ final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: B
     val hostEmulator = "10.0.2.2:9000"
     val hostBrowser = "localhost:9000"
     val hostHeroku = "monifu-ionic-sample.herokuapp.com"
-    val host = hostBrowser
+    val host = hostHeroku
 
     val source = if (doBackPressure) {
       val url = s"ws://$host/back-pressured-stream?periodMillis=${interval.toMillis}&seed=$seed"

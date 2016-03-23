@@ -45,7 +45,7 @@ lazy val server = (project in file("server")).settings(
     scalaVersion := scalaV,
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     libraryDependencies ++= Seq(
-      "org.monifu" %% "monifu" % "1.0",
+      "org.monifu" %% "monifu" % "1.1",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
     ),
   // Heroku specific
@@ -79,7 +79,7 @@ lazy val appJS = project.in(file("app-js"))
       "org.scala-js" %%% "scalajs-dom" % "0.8.0",
       "com.greencatsoft" %%% "scalajs-angular" % "0.6",
       "com.github.benhutchison" %%% "prickle" % "1.1.9",
-      "org.monifu" %%% "monifu" % "1.0"
+      "org.monifu" %%% "monifu" % "1.1"
     ),
     jsDependencies += RuntimeDOM,
     /// Webjars dependencies
@@ -118,7 +118,7 @@ lazy val appJVM = project.in(file("app-jvm"))
     name := "Monix Scala-js Ionic Starter Application Tabs (JVM)",
     normalizedName := "monix-ionic",
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "scalatags" % "0.5.2"
+      "com.lihaoyi" %% "scalatags" % "0.5.4"
     ),
     getCompileToHtmlPartialFunctionTask := {
       implicit val classPathFiles: Seq[sbt.File] = (fullClasspath in Runtime).value.files
