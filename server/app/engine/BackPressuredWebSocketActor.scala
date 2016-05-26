@@ -7,9 +7,11 @@ import monix.execution.Scheduler
 import monix.execution.rstreams.SingleAssignmentSubscription
 import monix.reactive.Observable
 import org.reactivestreams.{Subscriber, Subscription}
-import play.api.libs.json.{Writes, JsObject, JsValue, Json}
+import play.api.libs.json._
 import shared.models.Event
+
 import scala.concurrent.duration._
+import scala.util.Try
 
 
 class BackPressuredWebSocketActor[T <: Event : Writes]
@@ -17,12 +19,11 @@ class BackPressuredWebSocketActor[T <: Event : Writes]
   extends Actor with LazyLogging {
 
   def receive: Receive = {
-    case Request(nr) =>
-      subscription.request(nr)
+    case JsNumber(nr) if nr > 0 =>
+      Try(nr.toLongExact).foreach(subscription.request)
   }
 
-  private[this] val subscription =
-    SingleAssignmentSubscription()
+  private[this] val subscription = SingleAssignmentSubscription()
 
   def now(): Long =
     System.currentTimeMillis()
@@ -33,7 +34,7 @@ class BackPressuredWebSocketActor[T <: Event : Writes]
     val source = {
       val initial = Observable.evalOnce(initMessage(now()))
       val obs = initial ++ producer.map(x => Json.toJson(x))
-      val timeout = obs.debounce(5.seconds).map(_ => keepAliveMessage(now()))
+      val timeout = obs.debounceRepeated(5.seconds).map(_ => keepAliveMessage(now()))
 
       Observable
         .merge(obs, timeout)
