@@ -9,7 +9,8 @@ import shared.models.{Signal, Chat}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import concurrent.duration._
-import monifu.concurrent.Implicits.globalScheduler
+import monix.execution.Scheduler.Implicits.global
+import monix.reactive.Observable
 
 
 
@@ -21,7 +22,7 @@ class ChatsController(scope: ChatsScopeType) extends AbstractController[ChatsSco
 //   removing elements will only impact scope.chats array, not the underlying initial array defined in ChatsService.
   scope.remove = { chat: Chat => scope.chats.splice(scope.chats.indexOf(chat), 1) }
 
-  val s1 = new DataConsumer(1.second, 1274028492832L, doBackPressure = true)
+  val s1 = new DataConsumer(1.second, 1274028492832L, doBackPressure = false)
      .collect { case s: Signal => s }
 
     s1.foreach{ s =>

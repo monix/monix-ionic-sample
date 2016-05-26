@@ -6,7 +6,7 @@ import mobile.starttabs.dto.IPAddress
 import mobile.starttabs.service.BetterHttpService
 
 import scala.scalajs.js
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 
 @injectable("AccountCtrl")
@@ -25,4 +25,3 @@ class AccountController(scope: AccountScope, betterHttp: BetterHttpService) exte
 trait AccountScope extends Scope {
   var ip: IPAddress = js.native
 }
-

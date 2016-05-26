@@ -3,10 +3,9 @@ package engine
 import akka.actor.{Actor, ActorRef, Props}
 import com.typesafe.scalalogging.LazyLogging
 import engine.BackPressuredWebSocketActor._
-import monifu.concurrent.Scheduler
-import monifu.reactive.Observable
-import monifu.reactive.OverflowStrategy.DropOld
-import monifu.reactive.streams.SingleAssignmentSubscription
+import monix.execution.Scheduler
+import monix.execution.rstreams.SingleAssignmentSubscription
+import monix.reactive.Observable
 import org.reactivestreams.{Subscriber, Subscription}
 import play.api.libs.json.{Writes, JsObject, JsValue, Json}
 import shared.models.Event
@@ -32,15 +31,16 @@ class BackPressuredWebSocketActor[T <: Event : Writes]
     super.preStart()
 
     val source = {
-      val initial = Observable.unit(initMessage(now()))
+      val initial = Observable.evalOnce(initMessage(now()))
       val obs = initial ++ producer.map(x => Json.toJson(x))
       val timeout = obs.debounce(5.seconds).map(_ => keepAliveMessage(now()))
 
-      Observable.merge(obs, timeout)
-        .whileBusyBuffer(DropOld(100), nr => onOverflow(nr, now()))
+      Observable
+        .merge(obs, timeout)
+        .whileBusyDropEventsAndSignal(nr => onOverflow(nr, now()))
     }
 
-    source.toReactive.subscribe(new Subscriber[JsValue] {
+    source.toReactivePublisher.subscribe(new Subscriber[JsValue] {
       def onSubscribe(s: Subscription): Unit = {
         subscription := s
       }
@@ -132,4 +132,3 @@ object BackPressuredWebSocketActor {
     Json.obj("event" -> "init", "timestamp" -> now)
   }
 }
-

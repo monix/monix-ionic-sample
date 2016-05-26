@@ -1,7 +1,9 @@
 package mobile.stream
 
-import monifu.reactive.OverflowStrategy.DropNew
-import monifu.reactive.{Observable, Subscriber}
+import monix.execution.Cancelable
+import monix.reactive.Observable
+import monix.reactive.OverflowStrategy.DropNew
+import monix.reactive.observers.Subscriber
 // import org.scalajs.dom
 import shared.models._
 import scala.concurrent.duration.FiniteDuration
@@ -10,7 +12,7 @@ import scala.scalajs.js.Dynamic.global
 final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: Boolean)
   extends Observable[Event] {
 
-  def onSubscribe(subscriber: Subscriber[Event]): Unit = {
+  override def unsafeSubscribeFn(subscriber: Subscriber[Event]): Cancelable = {
     val hostEmulator = "10.0.2.2:9000"
     val hostBrowser = "localhost:9000"
     val hostHeroku = "monifu-ionic-sample.herokuapp.com"
@@ -27,7 +29,7 @@ final class DataConsumer(interval: FiniteDuration, seed: Long, doBackPressure: B
 
     source
       .collect { case IsEvent(e) => e }
-      .onSubscribe(subscriber)
+      .unsafeSubscribeFn(subscriber)
   }
 
   object IsEvent {

@@ -1,90 +1,108 @@
 package mobile.stream
 
-import monifu.concurrent.Scheduler
-import monifu.reactive._
-import monifu.reactive.channels.PublishChannel
+import monix.execution.Ack.Stop
+import monix.execution.{Ack, Cancelable}
+import monix.reactive.observers.Subscriber
+import monix.reactive.{Observable, OverflowStrategy}
 import org.scalajs.dom.raw.MessageEvent
 import org.scalajs.dom.{CloseEvent, ErrorEvent, Event, WebSocket}
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
-
-final class SimpleWebSocketClient private
-  (url: String, os: OverflowStrategy.Synchronous)
+/** This `Observable` is a simple variant that does not communicate
+  * using the Reactive Streams back-pressure protocol, like the one
+  * implemented by [[BackPressuredWebSocketClient]].
+  *
+  * Instead this connection uses a client-side buffer than can overflow. We
+  * can control what happens on overflow if our subscribers are too slow
+  * (like dropping events). But the disadvantage is that the server can't
+  * find out about it.
+  */
+final class SimpleWebSocketClient private (url: String, os: OverflowStrategy.Synchronous[String])
   extends Observable[String] { self =>
 
-  private def createChannel(webSocket: WebSocket)(implicit s: Scheduler) = {
-    try {
-      val channel = PublishChannel[String](os)
-      webSocket.onopen = (event: Event) => ()
-
-      webSocket.onerror = (event: ErrorEvent) => {
-        channel.pushError(BackPressuredWebSocketClient.Exception(event.message))
+  /** An `Observable` that upon subscription will open a
+    * buffered web-socket connection.
+    */
+  private val channel: Observable[String] =
+    // This `create` builder is safer to use (versus unsafeCreate), because
+    // the injected subscriber is going to be buffered and you don't
+    // have to know details about the back-pressure protocol in order to use it.
+    Observable.create[String](os) { downstream =>
+      // Reusing this in 2 places
+      def closeConnection(webSocket: WebSocket): Unit = {
+        Utils.log(s"Closing connection to $url")
+        if (webSocket != null && webSocket.readyState <= 1)
+          try webSocket.close() catch {
+            case _: Throwable => ()
+          }
       }
 
-      webSocket.onclose = (event: CloseEvent) => {
-        channel.pushComplete()
+      try {
+        Utils.log(s"Connecting to $url")
+        val webSocket = new WebSocket(url)
+
+        // Not doing anything on open
+        webSocket.onopen = (event: Event) => ()
+
+        webSocket.onerror = (event: ErrorEvent) => {
+          // If error, signal it and it will be the last message
+          downstream.onError(BackPressuredWebSocketClient.Exception(event.message))
+        }
+        webSocket.onclose = (event: CloseEvent) => {
+          // If close, signal it and it will be the last message
+          downstream.onComplete()
+        }
+        webSocket.onmessage = (event: MessageEvent) => {
+          // Signal next event as usual, but we need to catch
+          // Stop acknowledgements. But given this is a synchronous
+          // (buffered) subscriber, it's a simple if statement.
+          val ack = downstream.onNext(event.data.asInstanceOf[String])
+          if (ack == Stop) closeConnection(webSocket)
+        }
+
+        Cancelable(() => closeConnection(webSocket))
+      } catch {
+        case NonFatal(ex) =>
+          // Normally this could be a race condition, meaning that we aren't allowed to
+          // send `onError` twice and at this point we have no way of knowing if `onError`
+          // already happened, but this right here is fine, for one because this is Javascript,
+          // but also because the `downstream` is protected by a concurrent buffer.
+          downstream.onError(ex)
+          Cancelable.empty
       }
-
-      webSocket.onmessage = (event: MessageEvent) => {
-        channel.pushNext(event.data.asInstanceOf[String])
-      }
-
-      channel
-    }
-    catch {
-      case ex: Throwable =>
-        Observable.error(ex)
-    }
-  }
-
-  private def closeConnection(webSocket: WebSocket)(implicit s: Scheduler): Unit = {
-    if (webSocket != null && webSocket.readyState <= 1)
-      try webSocket.close() catch { case _: Throwable => () }
-  }
-
-  def onSubscribe(subscriber: Subscriber[String]): Unit = {
-    import subscriber.scheduler
-
-    var webSocket: WebSocket = null
-    val channel = try {
-      webSocket = new WebSocket(url)
-      createChannel(webSocket)
-    }
-    catch {
-      case ex: Throwable =>
-        Observable.error(ex)
     }
 
-    val source = channel.timeout(5.seconds)
-      .doOnCanceled(closeConnection(webSocket))
+  override def unsafeSubscribeFn(subscriber: Subscriber[String]): Cancelable =
+    channel.unsafeSubscribeFn(new Subscriber[String] {
+      val scheduler = subscriber.scheduler
 
-    source.onSubscribe(new Observer[String] {
       def onNext(elem: String): Future[Ack] =
         subscriber.onNext(elem)
 
       def onError(ex: Throwable): Unit = {
-        closeConnection(webSocket)
         scheduler.reportFailure(ex)
-        // retry connection in a couple of secs
-        self.delaySubscription(3.seconds)
-          .onSubscribe(subscriber)
+        // Retry connection in a couple of secs
+        self
+          .delaySubscription(3.seconds)
+          .unsafeSubscribeFn(subscriber)
       }
 
       def onComplete(): Unit = {
-        closeConnection(webSocket)
-        // retry connection in a couple of secs
-        self.delaySubscription(3.seconds)
-          .onSubscribe(subscriber)
+        // Retry connection in a couple of secs
+        self
+          .delaySubscription(3.seconds)
+          .unsafeSubscribeFn(subscriber)
       }
     })
-  }
 }
 
 object SimpleWebSocketClient {
-  def apply(url: String, os: OverflowStrategy.Synchronous): SimpleWebSocketClient = {
+  def apply(url: String, os: OverflowStrategy.Synchronous[String]): SimpleWebSocketClient = {
     new SimpleWebSocketClient(url, os)
   }
 
   case class Exception(msg: String) extends RuntimeException(msg)
+
 }

@@ -6,7 +6,7 @@ import mobile.ionic.{IonicLoading, LoadingOpt}
 import prickle.{Unpickle, Unpickler}
 
 import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.util.{Failure, Success, Try}

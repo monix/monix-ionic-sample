@@ -2,10 +2,11 @@ package engine
 
 import akka.actor.{Actor, ActorRef, Props}
 import engine.SimpleWebSocketActor.Next
-import monifu.concurrent.Scheduler
-import monifu.concurrent.cancelables.CompositeCancelable
-import monifu.reactive.Ack.Continue
-import monifu.reactive.Observable
+import monix.execution.Scheduler
+import monix.execution.rstreams.SingleAssignmentSubscription
+import monix.execution.cancelables.CompositeCancelable
+import monix.execution.Ack.Continue
+import monix.reactive.Observable
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.{Json, Writes, JsValue}
 import shared.models.Event
@@ -29,7 +30,7 @@ class SimpleWebSocketActor[T <: Event : Writes]
     super.preStart()
 
     val source = {
-      val initial = Observable.unit(initMessage(now()))
+      val initial = Observable.evalOnce(initMessage(now()))
       val obs = initial ++ producer.map(x => Json.toJson(x))
       val timeout = obs.debounce(3.seconds).map(_ => keepAliveMessage(now()))
       Observable.merge(obs, timeout)
