@@ -1,23 +1,32 @@
 package controllers
 
+import akka.actor.ActorSystem
+import akka.stream.Materializer
+import engine.{BackPressuredWebSocketActor, DataProducer, SimpleWebSocketActor}
 import monix.execution.Scheduler.Implicits.global
-import engine.{SimpleWebSocketActor, BackPressuredWebSocketActor, DataProducer}
+import play.api.Environment
 import play.api.libs.json.JsValue
+import play.api.libs.streams.ActorFlow
+import play.api.mvc.WebSocket.MessageFlowTransformer
 import play.api.mvc._
-import play.api.Play.current
-import concurrent.duration._
+import scala.concurrent.duration._
 
-object Application extends Controller with JSONFormats {
+class ApplicationController()
+  (implicit env: Environment, as: ActorSystem, m: Materializer)
+  extends Controller with JSONFormats {
+
+  implicit val messageFlowTransformer =
+    MessageFlowTransformer.jsonMessageFlowTransformer[JsValue, JsValue]
 
   def backPressuredStream(periodMillis: Int, seed: Long) =
-    WebSocket.acceptWithActor[String, JsValue] { req => out =>
+    WebSocket.accept[JsValue, JsValue] { request =>
       val obs = new DataProducer(periodMillis.millis, seed)
-      BackPressuredWebSocketActor.props(obs, out)
+      ActorFlow.actorRef(out => BackPressuredWebSocketActor.props(obs, out))
     }
 
   def simpleStream(periodMillis: Int, seed: Long) =
-    WebSocket.acceptWithActor[String, JsValue] { req => out =>
+    WebSocket.accept[JsValue, JsValue] { request =>
       val obs = new DataProducer(periodMillis.millis, seed)
-      SimpleWebSocketActor.props(obs, out)
+      ActorFlow.actorRef(out => SimpleWebSocketActor.props(obs, out))
     }
 }

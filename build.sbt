@@ -76,8 +76,8 @@ lazy val appJS = project.in(file("app-js"))
     name := "Monix Scala-js Ionic Starter Application Tabs",
     normalizedName := "monix-ionic",
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.8.0",
-      "com.greencatsoft" %%% "scalajs-angular" % "0.6",
+      "org.scala-js" %%% "scalajs-dom" % "0.9.0",
+      "com.greencatsoft" %%% "scalajs-angular" % "0.7",
       "com.github.benhutchison" %%% "prickle" % "1.1.9",
       "io.monix" %%% "monix" % "2.0-RC8"
     ),

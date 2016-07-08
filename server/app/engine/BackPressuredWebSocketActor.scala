@@ -7,23 +7,23 @@ import monix.execution.Scheduler
 import monix.execution.rstreams.SingleAssignmentSubscription
 import monix.reactive.Observable
 import org.reactivestreams.{Subscriber, Subscription}
-import play.api.libs.json.{JsObject, JsValue, Json, Writes}
+import play.api.libs.json._
 import shared.models.Event
 
 import scala.concurrent.duration._
+import scala.util.Try
 
 
 class BackPressuredWebSocketActor[T <: Event : Writes]
-  (producer: Observable[T], out: ActorRef)(implicit s: Scheduler)
+(producer: Observable[T], out: ActorRef)(implicit s: Scheduler)
   extends Actor with LazyLogging {
 
   def receive: Receive = {
-    case Request(nr) =>
-      subscription.request(nr)
+    case JsNumber(nr) if nr > 0 =>
+      Try(nr.toLongExact).foreach(subscription.request)
   }
 
   private[this] val subscription = SingleAssignmentSubscription()
-
 
   def now(): Long =
     System.currentTimeMillis()
@@ -36,7 +36,8 @@ class BackPressuredWebSocketActor[T <: Event : Writes]
       val obs = initial ++ producer.map(x => Json.toJson(x))
       val timeout = obs.debounceRepeated(5.seconds).map(_ => keepAliveMessage(now()))
 
-      Observable.merge(obs, timeout)
+      Observable
+        .merge(obs, timeout)
         .whileBusyDropEventsAndSignal(nr => onOverflow(nr, now()))
     }
 
@@ -76,14 +77,14 @@ class BackPressuredWebSocketActor[T <: Event : Writes]
 object BackPressuredWebSocketActor {
   /** Utility for quickly creating a `Props` */
   def props[T <: Event : Writes](producer: Observable[T], out: ActorRef)
-    (implicit s: Scheduler): Props = {
+                                (implicit s: Scheduler): Props = {
 
     Props(new BackPressuredWebSocketActor(producer, out))
   }
 
   /**
-   * For pattern matching request events.
-   */
+    * For pattern matching request events.
+    */
   object Request {
     def unapply(value: Any): Option[Long] =
       value match {
@@ -109,25 +110,25 @@ object BackPressuredWebSocketActor {
   }
 
   /**
-   * Builds an overflow notification.
-   */
+    * Builds an overflow notification.
+    */
   def onOverflow(dropped: Long, now: Long): JsObject =
-    Json.obj(
-      "event" -> "overflow",
-      "dropped" -> dropped,
-      "timestamp" -> now
-    )
+  Json.obj(
+    "event" -> "overflow",
+    "dropped" -> dropped,
+    "timestamp" -> now
+  )
 
   /**
-   * Keep-alive message.
-   */
+    * Keep-alive message.
+    */
   def keepAliveMessage(now: Long) = {
     Json.obj("event" -> "keep-alive", "timestamp" -> now)
   }
 
   /**
-   * Keep-alive message.
-   */
+    * Keep-alive message.
+    */
   def initMessage(now: Long) = {
     Json.obj("event" -> "init", "timestamp" -> now)
   }
