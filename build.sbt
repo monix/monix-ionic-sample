@@ -26,7 +26,7 @@ lazy val compileHtmlProdTask = taskKey[Unit]("Compile all scala files contained 
 lazy val cleanOutputJS = taskKey[Unit]("Clean the output JS directory")
 
 ///////////////////// END OF TAKS DEFINITION ///////////
-lazy val scalaV = "2.11.7"
+lazy val scalaV = "2.11.8"
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).
     settings(
@@ -45,7 +45,7 @@ lazy val server = (project in file("server")).settings(
     scalaVersion := scalaV,
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     libraryDependencies ++= Seq(
-      "org.monifu" %% "monifu" % "1.1",
+      "io.monix" %% "monix" % "2.0-RC8",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
     ),
   // Heroku specific
@@ -79,7 +79,7 @@ lazy val appJS = project.in(file("app-js"))
       "org.scala-js" %%% "scalajs-dom" % "0.8.0",
       "com.greencatsoft" %%% "scalajs-angular" % "0.6",
       "com.github.benhutchison" %%% "prickle" % "1.1.9",
-      "org.monifu" %%% "monifu" % "1.1"
+      "io.monix" %%% "monix" % "2.0-RC8"
     ),
     jsDependencies += RuntimeDOM,
     /// Webjars dependencies

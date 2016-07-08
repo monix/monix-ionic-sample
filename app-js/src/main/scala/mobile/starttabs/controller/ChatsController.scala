@@ -9,8 +9,7 @@ import shared.models.{Signal, Chat}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import concurrent.duration._
-import monifu.concurrent.Implicits.globalScheduler
-
+import monix.execution.Scheduler.Implicits.global
 
 
 @injectable("ChatsCtrl")
