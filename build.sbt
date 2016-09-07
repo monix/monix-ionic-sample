@@ -45,7 +45,7 @@ lazy val server = (project in file("server")).settings(
     scalaVersion := scalaV,
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     libraryDependencies ++= Seq(
-      "io.monix" %% "monix" % "2.0-RC9",
+      "io.monix" %% "monix" % "2.0.0",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
     ),
   // Heroku specific
@@ -76,10 +76,10 @@ lazy val appJS = project.in(file("app-js"))
     name := "Monix Scala-js Ionic Starter Application Tabs",
     normalizedName := "monix-ionic",
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.0",
+      "org.scala-js" %%% "scalajs-dom" % "0.9.1",
       "com.greencatsoft" %%% "scalajs-angular" % "0.7",
       "com.github.benhutchison" %%% "prickle" % "1.1.9",
-      "io.monix" %%% "monix" % "2.0-RC9"
+      "io.monix" %%% "monix" % "2.0.0"
     ),
     jsDependencies += RuntimeDOM,
     /// Webjars dependencies
